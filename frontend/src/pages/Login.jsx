@@ -28,7 +28,7 @@ export default function Login() {
     <div className="auth-page">
       <div className="auth-card">
         <h1 className="auth-title">Welcome back</h1>
-        <p className="auth-subtitle">Sign in to your TaskFlow account</p>
+        <p className="auth-subtitle">Sign in to your SyncFlow account to continue</p>
         {error && <div className="auth-alert">{error}</div>}
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">

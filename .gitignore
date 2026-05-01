@@ -46,3 +46,7 @@ frontend/.env.local
 backend/node_modules
 backend/.env
 backend/logs
+
+# Project Specific
+SKILL.md
+Team_Task_Manager_Assignment.md

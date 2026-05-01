@@ -28,8 +28,8 @@ export default function Signup() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1 className="auth-title">Get started</h1>
-        <p className="auth-subtitle">Create your TaskFlow account</p>
+        <h1 className="auth-title">Create Account</h1>
+        <p className="auth-subtitle">Join SyncFlow to manage your projects effortlessly</p>
         {error && <div className="auth-alert">{error}</div>}
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">

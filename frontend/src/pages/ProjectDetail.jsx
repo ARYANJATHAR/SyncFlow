@@ -164,50 +164,59 @@ export default function ProjectDetail() {
   return (
     <div className="page">
       <div className="page-header">
-        <div>
+        <div className="page-title-group">
           <h1 className="page-title">{project.name}</h1>
-          <p className="page-subtitle">{project.description || 'No description'}</p>
+          <p className="page-subtitle">{project.description || 'Manage your team tasks and progress'}</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
           {isAdmin && (
             <>
-              <button className="btn btn-primary" onClick={openCreateTask}>+ Add Task</button>
+              <button className="btn btn-primary" onClick={openCreateTask}>
+                 <span style={{ fontSize: '1.2rem', marginRight: '0.25rem' }}>+</span> Add Task
+              </button>
               <button className="btn btn-danger btn-sm" onClick={deleteProject}>Delete Project</button>
             </>
           )}
         </div>
       </div>
 
-      {/* Members Section */}
-      <div className="members-section">
-        <h2 style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-          Members ({project.members?.length || 0})
-        </h2>
-        <div className="members-list">
-          {project.members?.map(m => (
-            <div className="member-chip" key={m._id}>
-              <div className="navbar-avatar" style={{ width: 24, height: 24, fontSize: '0.65rem' }}>
-                {m.name.charAt(0).toUpperCase()}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
+        <div className="members-section card">
+          <h2 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            Team Members
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '400' }}>({project.members?.length || 0})</span>
+          </h2>
+          <div className="members-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+            {project.members?.map(m => (
+              <div key={m._id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'var(--bg-secondary)', padding: '0.4rem 0.8rem', borderRadius: '99px', border: '1px solid var(--border)' }}>
+                <div className="navbar-avatar" style={{ width: 24, height: 24, fontSize: '0.65rem' }}>
+                  {m.name.charAt(0).toUpperCase()}
+                </div>
+                <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{m.name}</span>
+                {m._id === project.admin._id ? (
+                  <span style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: '700', textTransform: 'uppercase' }}>Admin</span>
+                ) : isAdmin && (
+                  <button className="remove-btn" onClick={() => removeMember(m._id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '1.1rem', padding: '0 0.2rem' }}>×</button>
+                )}
               </div>
-              <span>{m.name}</span>
-              {m._id === project.admin._id && <span style={{ fontSize: '0.7rem', color: 'var(--accent)' }}>(Admin)</span>}
-              {isAdmin && m._id !== project.admin._id && (
-                <button className="remove-btn" onClick={() => removeMember(m._id)}>×</button>
-              )}
-            </div>
-          ))}
-        </div>
-        {isAdmin && (
-          <div className="add-member-row">
-            <input className="form-input" placeholder="Enter member email" value={memberEmail}
-              onChange={(e) => setMemberEmail(e.target.value)} />
-            <button className="btn btn-secondary btn-sm" onClick={addMember}>Add</button>
+            ))}
           </div>
-        )}
-        {memberMsg && <p style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: memberMsg.includes('added') ? 'var(--success)' : 'var(--danger)' }}>{memberMsg}</p>}
+          {isAdmin && (
+            <div className="add-member-row" style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem' }}>
+              <input className="form-input" placeholder="Invite by email..." value={memberEmail}
+                onChange={(e) => setMemberEmail(e.target.value)} style={{ flex: 1 }} />
+              <button className="btn btn-secondary btn-sm" onClick={addMember}>Invite</button>
+            </div>
+          )}
+          {memberMsg && <p style={{ fontSize: '0.85rem', marginTop: '0.75rem', color: memberMsg.includes('added') ? 'var(--success)' : 'var(--danger)', fontWeight: '500' }}>{memberMsg}</p>}
+        </div>
+
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', background: 'var(--accent)', color: '#fff', border: 'none' }}>
+           <div style={{ fontSize: '2.5rem', fontWeight: '700' }}>{Math.round((tasks.filter(t => t.status === 'Done').length / (tasks.length || 1)) * 100)}%</div>
+           <div style={{ opacity: 0.8, fontSize: '0.9rem', fontWeight: '500', marginTop: '0.25rem' }}>Project Completion</div>
+        </div>
       </div>
 
-      {/* Task Board */}
       <div className="task-board">
         {columns.map(col => {
           const colTasks = tasks.filter(t => t.status === col.key);
@@ -219,32 +228,41 @@ export default function ProjectDetail() {
               </div>
               <div className="task-list">
                 {colTasks.length === 0 ? (
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem' }}>No tasks</p>
+                  <div style={{ textAlign: 'center', padding: '3rem 1rem', border: '2px dashed var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Empty</p>
+                  </div>
                 ) : (
                   colTasks.map(task => (
                     <div className="task-card" key={task._id}>
                       <div className="task-card-title">{task.title}</div>
-                      <div className="task-card-meta">
+                      <div className="task-card-meta" style={{ marginBottom: '1rem' }}>
                         <span className={`task-priority ${task.priority.toLowerCase()}`}>{task.priority}</span>
-                        <span className={`task-due ${isOverdue(task.dueDate) && task.status !== 'Done' ? 'overdue' : ''}`}>
-                          {formatDate(task.dueDate)}
+                        <span className={`task-due ${isOverdue(task.dueDate) && task.status !== 'Done' ? 'overdue' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          📅 {formatDate(task.dueDate)}
                         </span>
                       </div>
+                      
                       {task.assignedTo && (
-                        <div className="task-assignee">→ {task.assignedTo.name}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0', borderTop: '1px solid var(--bg-secondary)', borderBottom: '1px solid var(--bg-secondary)', marginBottom: '1rem' }}>
+                           <div className="navbar-avatar" style={{ width: 20, height: 20, fontSize: '0.6rem' }}>
+                            {task.assignedTo.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{task.assignedTo.name}</span>
+                        </div>
                       )}
-                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-                        <select className="status-select" value={task.status}
+
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <select className="form-input" style={{ padding: '0.3rem 0.5rem', fontSize: '0.75rem', width: 'auto' }} value={task.status}
                           onChange={(e) => updateStatus(task._id, e.target.value)}>
                           <option>To Do</option>
                           <option>In Progress</option>
                           <option>Done</option>
                         </select>
                         {isAdmin && (
-                          <>
-                            <button className="btn btn-secondary btn-sm" onClick={() => openEditTask(task)}>Edit</button>
-                            <button className="btn btn-danger btn-sm" onClick={() => deleteTask(task._id)}>Del</button>
-                          </>
+                          <div style={{ display: 'flex', gap: '0.25rem' }}>
+                            <button className="btn-icon" onClick={() => openEditTask(task)} title="Edit">✎</button>
+                            <button className="btn-icon" onClick={() => deleteTask(task._id)} title="Delete" style={{ color: 'var(--danger)' }}>×</button>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -256,23 +274,22 @@ export default function ProjectDetail() {
         })}
       </div>
 
-      {/* Task Modal */}
       {showTaskModal && (
         <div className="modal-overlay" onClick={() => setShowTaskModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="modal-title">{editingTask ? 'Edit Task' : 'Create Task'}</h2>
+              <h2 className="modal-title">{editingTask ? 'Edit Task' : 'New Task'}</h2>
               <button className="modal-close" onClick={() => setShowTaskModal(false)}>×</button>
             </div>
-            {taskError && <div className="auth-alert" style={{ marginBottom: '1rem' }}>{taskError}</div>}
+            {taskError && <div className="auth-alert">{taskError}</div>}
             <form className="modal-form" onSubmit={handleTaskSubmit}>
               <div className="form-group">
-                <label className="form-label">Title</label>
-                <input className="form-input" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} required />
+                <label className="form-label">Task Title</label>
+                <input className="form-input" value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} placeholder="What needs to be done?" required />
               </div>
               <div className="form-group">
-                <label className="form-label">Description</label>
-                <textarea className="form-input form-textarea" value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} />
+                <label className="form-label">Description (optional)</label>
+                <textarea className="form-input form-textarea" value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} placeholder="Add some details..." />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
@@ -289,7 +306,7 @@ export default function ProjectDetail() {
                 </div>
               </div>
               <div className="form-group">
-                <label className="form-label">Assign To</label>
+                <label className="form-label">Assignee</label>
                 <select className="form-input form-select" value={taskAssignee} onChange={(e) => setTaskAssignee(e.target.value)}>
                   <option value="">Unassigned</option>
                   {project.members?.map(m => (
